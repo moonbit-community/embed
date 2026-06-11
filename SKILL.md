@@ -18,6 +18,9 @@ moon runwasm moonbit-community/embed-files <path> -o <output.mbt>
 
 - `-o <output.mbt>` is required and selects the generated MoonBit source file.
 - The output directory must already exist.
+- `--prune <path>` / `-p <path>` may be repeated to skip files or directories
+  relative to the input directory. When a directory path matches, the whole
+  subtree is skipped.
 - For a single text file, writes one
   private `let _embed_files_<file_name_ext> : String = #|...` and one public
   `pub let <file_name_ext> : String = _embed_files_<file_name_ext>`.

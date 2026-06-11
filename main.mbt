@@ -195,6 +195,32 @@ fn unique_type_name(base : String, names : Array[String]) -> String {
 }
 
 ///|
+fn normalize_prune_paths(paths : Array[String]) -> Array[String] {
+  let normalized : Array[String] = []
+  for path in paths {
+    let value = normalize_path(path)
+    if value != "" && value != "." {
+      normalized.push(value)
+    }
+  }
+  normalized
+}
+
+///|
+fn should_prune_path(
+  relative_path : String,
+  prune_paths : Array[String],
+) -> Bool {
+  let path = normalize_path(relative_path)
+  for prune_path in prune_paths {
+    if path == prune_path {
+      return true
+    }
+  }
+  false
+}
+
+///|
 fn bytes_has_nul(bytes : Bytes) -> Bool {
   for byte in bytes.to_array() {
     if byte == b'\x00' {
@@ -218,14 +244,30 @@ fn read_embedded_content(path : String) -> EmbeddedContent raise {
 }
 
 ///|
-fn collect_dir(dir : String, output_path : String) -> BundleDir raise {
+fn collect_dir(
+  dir : String,
+  output_path : String,
+  prune_paths : Array[String],
+  relative_dir : String,
+) -> BundleDir raise {
   let normalized_output = normalize_path(output_path)
   let entries : Array[BundleEntry] = []
   for name in @miniio.readdir(dir, include_hidden=true, sort=true) {
     let child = path_join(dir, name)
-    if normalize_path(child) != normalized_output {
+    let relative_child = if relative_dir == "" {
+      name
+    } else {
+      path_join(relative_dir, name)
+    }
+    if normalize_path(child) != normalized_output &&
+      !should_prune_path(relative_child, prune_paths) {
       if @miniio.is_dir(child) {
-        entries.push(EntryDir(name, collect_dir(child, output_path)))
+        entries.push(
+          EntryDir(
+            name,
+            collect_dir(child, output_path, prune_paths, relative_child),
+          ),
+        )
       } else {
         let content = read_embedded_content(child)
         entries.push(EntryFile(name, content))
@@ -236,9 +278,13 @@ fn collect_dir(dir : String, output_path : String) -> BundleDir raise {
 }
 
 ///|
-fn read_input_bundle(input : String, output_path : String) -> InputBundle raise {
+fn read_input_bundle(
+  input : String,
+  output_path : String,
+  prune_paths : Array[String],
+) -> InputBundle raise {
   if @miniio.is_dir(input) {
-    Directory(collect_dir(normalize_path(input), output_path))
+    Directory(collect_dir(normalize_path(input), output_path, prune_paths, ""))
   } else {
     SingleFile(read_embedded_content(input))
   }
@@ -487,8 +533,13 @@ fn count_bundle_files(bundle : InputBundle) -> Int {
 }
 
 ///|
-fn run(input : String, output_path : String) -> Unit {
-  let bundle = read_input_bundle(input, output_path) catch {
+fn run(
+  input : String,
+  output_path : String,
+  prune_paths : Array[String],
+) -> Unit {
+  let normalized_prune_paths = normalize_prune_paths(prune_paths)
+  let bundle = read_input_bundle(input, output_path, normalized_prune_paths) catch {
     err => die("failed to read input \{input}: \{err}")
   }
   let content = render_bundle(input, bundle)
@@ -519,6 +570,12 @@ fn main {
           about="Output MoonBit source path.",
           required=true,
         ),
+        @argparse.OptionArg(
+          "prune",
+          short='p',
+          about="Relative file or directory path to skip. May be repeated.",
+          action=Append,
+        ),
       ],
       positionals=[
         @argparse.PositionArg(
@@ -531,7 +588,11 @@ fn main {
     let matches = cli.parse()
     let input = matches.values["path"][0]
     let output_path = matches.values["output"][0]
-    run(input, output_path)
+    let prune_paths = match matches.values.get("prune") {
+      Some(paths) => paths
+      None => []
+    }
+    run(input, output_path, prune_paths)
   } catch {
     err => {
       println(err.to_string())

@@ -8,6 +8,14 @@ test "sanitize identifier" {
 }
 
 ///|
+test "prune paths match normalized relative paths" {
+  let prune_paths = normalize_prune_paths(["./nested", "a/../skip.txt", "."])
+  assert_true(should_prune_path("nested", prune_paths))
+  assert_true(should_prune_path("./skip.txt", prune_paths))
+  assert_eq(should_prune_path("nested/data.bin", prune_paths), false)
+}
+
+///|
 test "render single file bundle" {
   let rendered = render_bundle("data-file.txt", SingleFile(Text("one\ntwo")))
   assert_true(

@@ -8,6 +8,12 @@ moon runwasm moonbit-community/embed-files ./fixtures -o fixtures_bundle.mbt
 
 The `-o <output.mbt>` option is required.
 The output directory must already exist.
+Use `--prune <path>` or `-p <path>` to skip files or directories relative to
+the input directory. The option can be repeated:
+
+```sh
+moon runwasm moonbit-community/embed-files ./fixtures -o fixtures_bundle.mbt --prune _build --prune cache/tmp.bin
+```
 
 For a directory input like `./fixtures`, files become fields on a generated
 fixture record, and subdirectories become nested fixture records. UTF-8 text
