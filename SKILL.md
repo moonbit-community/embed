@@ -5,44 +5,43 @@ description: "Embed files into a generated MoonBit source file."
 
 # embed-files
 
-Use this skill when the user wants to embed a file or all files from one
-directory into a generated MoonBit source file.
+Use this skill when a MoonBit project needs small fixture files, examples,
+templates, or other static assets checked in as generated MoonBit source.
 
-## Run
+## Workflow
+
+1. Choose the exact file or directory to embed. Do not embed build outputs,
+   dependency caches, secrets, or large generated trees unless the user
+   explicitly asks for them.
+2. Choose an output `.mbt` path in the package that should own the embedded
+   data. The output path is required; missing parent directories are created.
+3. Run the tool:
 
 ```sh
 moon runwasm moonbit-community/embed-files <path> -o <output.mbt> [--prune <path> ...]
 ```
 
-For example:
+Use repeated `--prune <path>` / `-p <path>` options for paths relative to the
+input directory:
 
 ```sh
-moon runwasm moonbit-community/embed-files ./fixtures -o fixtures_bundle.mbt --prune _build --prune .mooncakes
+moon runwasm moonbit-community/embed-files ./fixtures -o test/fixtures_bundle.mbt --prune _build --prune .mooncakes
 ```
 
-## Behavior
+4. Inspect the generated file before handoff. Check that the public names are
+   usable for the surrounding code and that no unintended files were embedded.
+5. Run the package or module checks that cover the output file, normally
+   `moon check` and the relevant `moon test`.
 
-- `-o <output.mbt>` is required and selects the generated MoonBit source file.
-- Missing parent directories for `-o <output.mbt>` are created recursively.
-- `--prune <path>` / `-p <path>` may be repeated to skip files or directories
-  relative to the input directory. When a directory path matches, the whole
-  subtree is skipped.
-- Prefer pruning generated or cache directories such as `_build`, `.mooncakes`,
-  `tmp`, or `node_modules` when embedding project trees.
-- For a single text file, writes one
-  private `let _embed_files_<file_name_ext> : String = #|...` and one public
-  `pub let <file_name_ext> : String = _embed_files_<file_name_ext>`.
-- For a single binary file, writes one
-  private `let _embed_files_<file_name_ext> : Bytes = ([0xFF, 0xAA, ...] : Bytes)`
-  and one public `pub let <file_name_ext> : Bytes = _embed_files_<file_name_ext>`.
-- For a directory, reads all files recursively, including hidden files, and
-  writes the requested output file.
-- Directory output defines `pub struct <DirName>Fixture { ... }` and
-  `pub let <dir_name> : <DirName>Fixture = { ... }`. Subdirectories are
-  preserved as nested fixture structs and nested record values instead of being
-  flattened into one struct.
-- Embedded file contents are emitted as private `_embed_files_*` top-level
-  constants, and the final directory value references those constants.
-- File and directory name characters that are not ASCII letters or digits are
-  converted to underscores in generated names.
-- Duplicate generated names are suffixed with `_2`, `_3`, and so on.
+## Guidance
+
+- Prefer embedding stable, small inputs used by tests, examples, or code
+  generation. Keep large assets as external files unless embedding is
+  intentional.
+- Prune common project noise such as `_build`, `.mooncakes`, `tmp`,
+  `node_modules`, coverage output, downloaded dependencies, and editor caches.
+- Binary files are supported, but inspect the generated size before committing.
+- Directory inputs are recursive and keep their nested structure in the
+  generated MoonBit API.
+- If generated names collide or are awkward, rename the source files or choose a
+  narrower input directory, then regenerate.
