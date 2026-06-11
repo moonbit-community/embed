@@ -11,7 +11,13 @@ directory into a generated MoonBit source file.
 ## Run
 
 ```sh
-moon runwasm moonbit-community/embed-files <path> -o <output.mbt>
+moon runwasm moonbit-community/embed-files <path> -o <output.mbt> [--prune <path> ...]
+```
+
+For example:
+
+```sh
+moon runwasm moonbit-community/embed-files ./fixtures -o fixtures_bundle.mbt --prune _build --prune .mooncakes
 ```
 
 ## Behavior
@@ -21,6 +27,8 @@ moon runwasm moonbit-community/embed-files <path> -o <output.mbt>
 - `--prune <path>` / `-p <path>` may be repeated to skip files or directories
   relative to the input directory. When a directory path matches, the whole
   subtree is skipped.
+- Prefer pruning generated or cache directories such as `_build`, `.mooncakes`,
+  `tmp`, or `node_modules` when embedding project trees.
 - For a single text file, writes one
   private `let _embed_files_<file_name_ext> : String = #|...` and one public
   `pub let <file_name_ext> : String = _embed_files_<file_name_ext>`.
