@@ -1,0 +1,10 @@
+import {
+  "moonbit-community/miniio",
+  "moonbitlang/x/path",
+}
+
+supported_targets = "wasm"
+
+options(
+  "is-main": true,
+)
