@@ -5,3 +5,5 @@ target
 .mooncakes/
 .moonagent/
 _tmp_*
+tmp/
+tmp_*.mbt
