@@ -18,6 +18,11 @@ fn normalize_path(path : String) -> String {
 }
 
 ///|
+fn dirname(path : String) -> String {
+  @path.Path(path).normalize().dirname().to_string()
+}
+
+///|
 fn dir_basename(path : String) -> String {
   @path.Path(path).normalize().basename().to_owned()
 }
@@ -218,6 +223,41 @@ fn should_prune_path(
     }
   }
   false
+}
+
+///|
+fn path_exists(path : String) -> Bool raise {
+  @miniio.exists(path) catch {
+    Noent | Notdir => false
+    err => raise err
+  }
+}
+
+///|
+fn ensure_dir(path : String) -> Unit raise {
+  let normalized = normalize_path(path)
+  if normalized == "" || normalized == "." {
+    return
+  }
+  if path_exists(normalized) {
+    guard @miniio.is_dir(normalized) else { raise @miniio.Errno::Notdir }
+    return
+  }
+  let parent = dirname(normalized)
+  if parent != normalized {
+    ensure_dir(parent)
+  }
+  @miniio.mkdir(normalized) catch {
+    Exist => {
+      guard @miniio.is_dir(normalized) else { raise @miniio.Errno::Notdir }
+    }
+    err => raise err
+  }
+}
+
+///|
+fn ensure_output_parent_dir(output_path : String) -> Unit raise {
+  ensure_dir(dirname(output_path))
 }
 
 ///|
@@ -543,6 +583,9 @@ fn run(
     err => die("failed to read input \{input}: \{err}")
   }
   let content = render_bundle(input, bundle)
+  ensure_output_parent_dir(output_path) catch {
+    err => die("failed to create output directory for \{output_path}: \{err}")
+  }
   @miniio.write_text_file(
     output_path,
     content,

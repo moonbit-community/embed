@@ -6,8 +6,8 @@ Embed a file or all files under a directory into one MoonBit source file.
 moon runwasm moonbit-community/embed-files ./fixtures -o fixtures_bundle.mbt
 ```
 
-The `-o <output.mbt>` option is required.
-The output directory must already exist.
+The `-o <output.mbt>` option is required. Missing parent directories for the
+output path are created recursively.
 Use `--prune <path>` or `-p <path>` to skip files or directories relative to
 the input directory. The option can be repeated:
 

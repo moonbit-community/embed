@@ -23,7 +23,7 @@ moon runwasm moonbit-community/embed-files ./fixtures -o fixtures_bundle.mbt --p
 ## Behavior
 
 - `-o <output.mbt>` is required and selects the generated MoonBit source file.
-- The output directory must already exist.
+- Missing parent directories for `-o <output.mbt>` are created recursively.
 - `--prune <path>` / `-p <path>` may be repeated to skip files or directories
   relative to the input directory. When a directory path matches, the whole
   subtree is skipped.

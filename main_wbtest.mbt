@@ -16,6 +16,35 @@ test "prune paths match normalized relative paths" {
 }
 
 ///|
+test "ensure output parent dir creates nested directories" {
+  let root = "_tmp_embed_files_parent_test"
+  @miniio.rmdir(root, recursive=true) catch {
+    Noent => ()
+    err => raise err
+  }
+  ensure_output_parent_dir("\{root}/a/b/files.mbt")
+  assert_true(@miniio.is_dir("\{root}/a/b"))
+  @miniio.rmdir(root, recursive=true)
+}
+
+///|
+test "ensure output parent dir rejects file parent" {
+  let root = "_tmp_embed_files_parent_file"
+  @miniio.remove(root) catch {
+    Noent => ()
+    err => raise err
+  }
+  @miniio.write_text_file(root, "not a dir", create_mode=CreateOrTruncate)
+  let mut failed = false
+  ensure_output_parent_dir("\{root}/files.mbt") catch {
+    @miniio.Errno::Notdir => failed = true
+    err => raise err
+  }
+  assert_true(failed)
+  @miniio.remove_file(root)
+}
+
+///|
 test "render single file bundle" {
   let rendered = render_bundle("data-file.txt", SingleFile(Text("one\ntwo")))
   assert_true(
