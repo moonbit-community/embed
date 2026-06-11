@@ -4,11 +4,12 @@ run-name: publish embed-files ${{ github.event_name == 'workflow_dispatch' && in
 on:
   push:
     tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
       - "embed-files-v*"
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing release tag, for example embed-files-v0.1.0"
+        description: "Existing release tag, for example 0.1.0"
         required: true
         type: string
 
@@ -42,9 +43,10 @@ jobs:
           fi
 
           case "$tag" in
+            [0-9]*.[0-9]*.[0-9]*) version="$tag" ;;
             embed-files-v*) version="${tag#embed-files-v}" ;;
             *)
-              echo "Release tag must use the embed-files-v* format, got: $tag" >&2
+              echo "Release tag must use the 0.1.0 or embed-files-v0.1.0 format, got: $tag" >&2
               exit 1
               ;;
           esac
