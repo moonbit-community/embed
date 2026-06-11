@@ -8,16 +8,6 @@ fn[A] die(message : String) -> A {
 }
 
 ///|
-fn usage() -> String {
-  let text =
-    #|Usage: embed-files <path>
-    #|
-    #|Embed a file or all files under a directory into <path>_bundle.mbt.
-    #|
-  text
-}
-
-///|
 fn path_join(base : String, child : String) -> String {
   @path.Path::join(base, child).to_string()
 }
@@ -30,18 +20,6 @@ fn normalize_path(path : String) -> String {
 ///|
 fn dir_basename(path : String) -> String {
   @path.Path(path).normalize().basename().to_owned()
-}
-
-///|
-fn output_path_for_input(input : String) -> String {
-  let normalized = normalize_path(input)
-  let parent = @path.Path(normalized).dirname().to_string()
-  let name = safe_identifier(dir_basename(normalized)) + "_bundle.mbt"
-  if parent == "" || parent == "." {
-    name
-  } else {
-    path_join(parent, name)
-  }
 }
 
 ///|
@@ -341,11 +319,17 @@ fn render_dir_bundle(
     $|pub let \{value_name} : \{type_name} = {
     $|
   for i in 0..<files.length() {
-    buf <+ "  \{fields[i]}: (\n"
+    buf <+
+      $|  \{fields[i]}: (
+      $|
     write_content_literal(buf, files[i].1, "    ")
-    buf <+ "  ),\n"
+    buf <+
+      $|  ),
+      $|
   }
-  buf <+ "}\n"
+  buf <+
+    $|}
+    $|
   buf.to_string()
 }
 
@@ -375,8 +359,7 @@ fn count_label(count : Int) -> String {
 }
 
 ///|
-fn run(input : String) -> Unit raise {
-  let output_path = output_path_for_input(input)
+fn run(input : String, output_path : String) -> Unit raise {
   let (is_dir, entries) = read_input_entries(input, output_path)
   let content = render_bundle(input, is_dir, entries)
   @miniio.write_text_file(
@@ -392,17 +375,33 @@ fn run(input : String) -> Unit raise {
 ///|
 fn main {
   try {
-    let args = @miniio.args_get()
-    if args.length() == 2 && (args[1] == "-h" || args[1] == "--help") {
-      @miniio.stdout.write_text(usage())
-      @miniio.exit(0)
-    }
-    if args.length() != 2 {
-      @miniio.stderr.write_text(usage())
+    let cli = @argparse.Command(
+      "embed-files",
+      about="Embed a file or all files under a directory into a MoonBit source file.",
+      options=[
+        @argparse.OptionArg(
+          "output",
+          short='o',
+          about="Output MoonBit source path.",
+          required=true,
+        ),
+      ],
+      positionals=[
+        @argparse.PositionArg(
+          "path",
+          about="File or directory to embed.",
+          num_args=@argparse.ValueRange::single(),
+        ),
+      ],
+    )
+    let matches = cli.parse()
+    let input = matches.values["path"][0]
+    let output_path = matches.values["output"][0]
+    run(input, output_path)
+  } catch {
+    err => {
+      println(err.to_string())
       @miniio.exit(2)
     }
-    run(args[1])
-  } catch {
-    err => die(err.to_string())
   }
 }

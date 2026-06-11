@@ -11,17 +11,18 @@ directory into a generated MoonBit source file.
 ## Run
 
 ```sh
-moon runwasm moonbit-community/embed-files <path>
+moon runwasm moonbit-community/embed-files <path> -o <output.mbt>
 ```
 
 ## Behavior
 
-- For a single text file, writes `<file_name_ext>_bundle.mbt` with one
+- `-o <output.mbt>` is required and selects the generated MoonBit source file.
+- For a single text file, writes one
   `pub let <file_name_ext> : String = #|...`.
-- For a single binary file, writes `<file_name_ext>_bundle.mbt` with one
+- For a single binary file, writes one
   `pub let <file_name_ext> : Bytes = ([0xFF, 0xAA, ...] : Bytes)`.
 - For a directory, reads all files recursively, including hidden files, and
-  writes `<dir>_bundle.mbt`.
+  writes the requested output file.
 - Directory output defines `pub struct <DirName>Fixture { ... }` and
   `pub let <dir_name> : <DirName>Fixture = { ... }`, with each field typed as
   `String` or `Bytes`.

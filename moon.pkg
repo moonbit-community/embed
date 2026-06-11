@@ -1,5 +1,6 @@
 import {
   "moonbit-community/miniio",
+  "moonbitlang/core/argparse",
   "moonbitlang/x/path",
 }
 
