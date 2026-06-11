@@ -1,6 +1,6 @@
 ///|
 fn[A] die(message : String) -> A {
-  @miniio.stderr.write_text("error: " + message + "\n") catch {
+  @miniio.stderr.write_text("error: \{message}\n") catch {
     _ => ()
   }
   @miniio.exit(1)
@@ -94,7 +94,7 @@ fn is_reserved_identifier(name : String) -> Bool {
 fn safe_identifier(raw : String) -> String {
   let name = sanitize_identifier(raw)
   if is_reserved_identifier(name) {
-    name + "_"
+    "\{name}_"
   } else {
     name
   }
@@ -140,7 +140,7 @@ fn unique_name(base : String, names : Array[String]) -> String {
   let mut candidate = base
   let mut suffix = 2
   while contains_name(names, candidate) {
-    candidate = base + "_" + suffix.to_string()
+    candidate = "\{base}_\{suffix}"
     suffix += 1
   }
   names.push(candidate)
@@ -354,7 +354,7 @@ fn count_label(count : Int) -> String {
   if count == 1 {
     "1 file"
   } else {
-    count.to_string() + " files"
+    "\{count} files"
   }
 }
 
@@ -368,7 +368,7 @@ fn run(input : String, output_path : String) -> Unit raise {
     create_mode=@miniio.CreateMode::CreateOrTruncate,
   )
   @miniio.stdout.write_text(
-    "wrote " + output_path + " with " + count_label(entries.length()) + "\n",
+    "wrote \{output_path} with \{count_label(entries.length())}\n",
   )
 }
 
