@@ -1,9 +1,9 @@
 ---
-name: quick-bundle
+name: embed-files
 description: "Bundle a directory of UTF-8 files into a MoonBit source file."
 ---
 
-# quick-bundle
+# embed-files
 
 Use this skill when the user wants to embed all UTF-8 files from one directory
 into a generated MoonBit source file.
@@ -11,7 +11,7 @@ into a generated MoonBit source file.
 ## Run
 
 ```sh
-moon runwasm moonbit-community/quick-bundle <dir>
+moon runwasm moonbit-community/embed-files <dir>
 ```
 
 ## Behavior
@@ -25,5 +25,5 @@ moon runwasm moonbit-community/quick-bundle <dir>
 - The input directory must be visible to the WASIp1 runner. For example:
 
 ```sh
-wasmtime run --dir ./fixtures::fixtures _build/wasm/debug/build/quick-bundle/quick-bundle.wasm fixtures
+wasmtime run --dir ./fixtures::fixtures _build/wasm/debug/build/embed-files/embed-files.wasm fixtures
 ```

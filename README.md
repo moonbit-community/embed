@@ -1,9 +1,9 @@
-# quick-bundle
+# embed-files
 
 Bundle all UTF-8 files under a directory into one MoonBit source file.
 
 ```sh
-moon runwasm moonbit-community/quick-bundle ./fixtures
+moon runwasm moonbit-community/embed-files ./fixtures
 ```
 
 For `./fixtures`, the generated file is `fixtures_bundle.mbt`. Each bundled

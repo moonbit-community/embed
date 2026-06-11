@@ -1,10 +1,10 @@
-name = "moonbit-community/quick-bundle"
+name = "moonbit-community/embed-files"
 
 version = "0.1.0"
 
 readme = "README.md"
 
-repository = "https://github.com/moonbit-community/quick-bundle"
+repository = "https://github.com/moonbit-community/embed-files"
 
 license = "Apache-2.0"
 
