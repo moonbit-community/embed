@@ -22,8 +22,3 @@ moon runwasm moonbit-community/embed-files <dir>
 - File and directory name characters that are not ASCII letters or digits are
   converted to underscores in the generated constant names.
 - Duplicate generated names are suffixed with `_2`, `_3`, and so on.
-- The input directory must be visible to the WASIp1 runner. For example:
-
-```sh
-wasmtime run --dir ./fixtures::fixtures _build/wasm/debug/build/embed-files/embed-files.wasm fixtures
-```
