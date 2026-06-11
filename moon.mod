@@ -10,7 +10,7 @@ license = "Apache-2.0"
 
 keywords = [ "wasm", "skill", "agent" ]
 
-description = "Embed UTF-8 files into a generated MoonBit source file."
+description = "Embed files into a generated MoonBit source file."
 
 preferred_target = "wasm"
 

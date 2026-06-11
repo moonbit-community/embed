@@ -10,7 +10,7 @@ test "sanitize identifier" {
 ///|
 test "render single file bundle" {
   let rendered = render_bundle("data-file.txt", false, [
-    ("data-file.txt", "one\ntwo"),
+    ("data-file.txt", Text("one\ntwo")),
   ])
   assert_true(rendered.contains("pub let data_file_txt : String ="))
   assert_true(rendered.contains("  #|one\n  #|two\n"))
@@ -18,12 +18,25 @@ test "render single file bundle" {
 }
 
 ///|
+test "render binary file bundle" {
+  let rendered = render_bundle("data.bin", false, [
+    ("data.bin", Binary(([0xFF, 0xAA, 0x00] : Bytes))),
+  ])
+  assert_true(rendered.contains("pub let data_bin : Bytes ="))
+  assert_true(rendered.contains("0xFF, 0xAA, 0x00,"))
+}
+
+///|
 test "render directory fixture" {
-  let files = [("a.txt", "one\ntwo"), ("a-txt", "three")]
+  let files = [
+    ("a.txt", Text("one\ntwo")),
+    ("a-txt", Binary(([0xFF, 0xAA] : Bytes))),
+  ]
   let rendered = render_bundle("sample-dir", true, files)
   assert_true(rendered.contains("pub struct SampleDirFixture {"))
   assert_true(rendered.contains("  a_txt : String\n"))
-  assert_true(rendered.contains("  a_txt_2 : String\n"))
+  assert_true(rendered.contains("  a_txt_2 : Bytes\n"))
   assert_true(rendered.contains("pub let sample_dir : SampleDirFixture = {"))
   assert_true(rendered.contains("  a_txt: (\n    #|one\n    #|two\n  ),"))
+  assert_true(rendered.contains("  a_txt_2: (\n    ([\n      0xFF, 0xAA,"))
 }
