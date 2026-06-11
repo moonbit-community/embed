@@ -1,9 +1,9 @@
-# embed-files
+# embed
 
 Embed a file or all files under a directory into one MoonBit source file.
 
 ```sh
-moon runwasm moonbit-community/embed-files ./fixtures -o fixtures_bundle.mbt
+moon runwasm moonbit-community/embed ./fixtures -o fixtures_bundle.mbt
 ```
 
 The `-o <output.mbt>` option is required. Missing parent directories for the
@@ -12,7 +12,7 @@ Use `--prune <path>` or `-p <path>` to skip files or directories relative to
 the input directory. The option can be repeated:
 
 ```sh
-moon runwasm moonbit-community/embed-files ./fixtures -o fixtures_bundle.mbt --prune _build --prune cache/tmp.bin
+moon runwasm moonbit-community/embed ./fixtures -o fixtures_bundle.mbt --prune _build --prune cache/tmp.bin
 ```
 
 For a directory input like `./fixtures`, files become fields on a generated
@@ -22,10 +22,10 @@ contents are emitted as private top-level constants so the final fixture value
 stays short:
 
 ```moonbit
-let _embed_files_readme_md : String =
+let _embed_readme_md : String =
   #|...
 
-let _embed_files_image_png : Bytes =
+let _embed_image_png : Bytes =
   ([
     0xFF, 0xAA,
   ] : Bytes)
@@ -40,9 +40,9 @@ pub struct NestedFixture {
 }
 
 pub let fixtures : FixturesFixture = {
-  readme_md: _embed_files_readme_md,
+  readme_md: _embed_readme_md,
   nested: {
-    image_png: _embed_files_image_png,
+    image_png: _embed_image_png,
   },
 }
 ```
@@ -51,19 +51,19 @@ For a single file input like `./fixtures/readme.md`, the generated output has
 one top-level constant:
 
 ```moonbit
-let _embed_files_readme_md : String =
+let _embed_readme_md : String =
   #|...
 
-pub let readme_md : String = _embed_files_readme_md
+pub let readme_md : String = _embed_readme_md
 ```
 
 For a single binary file input, the generated constant has type `Bytes`:
 
 ```moonbit
-let _embed_files_image_png : Bytes =
+let _embed_image_png : Bytes =
   ([
     0xFF, 0xAA,
   ] : Bytes)
 
-pub let image_png : Bytes = _embed_files_image_png
+pub let image_png : Bytes = _embed_image_png
 ```

@@ -1,10 +1,10 @@
-name = "moonbit-community/embed-files"
+name = "moonbit-community/embed"
 
 version = "0.1.0"
 
 readme = "README.md"
 
-repository = "https://github.com/moonbit-community/embed-files"
+repository = "https://github.com/moonbit-community/embed"
 
 license = "Apache-2.0"
 

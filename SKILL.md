@@ -1,9 +1,9 @@
 ---
-name: embed-files
+name: embed
 description: "Embed files into a generated MoonBit source file."
 ---
 
-# embed-files
+# embed
 
 Use this skill when a MoonBit project needs small fixture files, examples,
 templates, or other static assets checked in as generated MoonBit source.
@@ -18,14 +18,14 @@ templates, or other static assets checked in as generated MoonBit source.
 3. Run the tool:
 
 ```sh
-moon runwasm moonbit-community/embed-files <path> -o <output.mbt> [--prune <path> ...]
+moon runwasm moonbit-community/embed <path> -o <output.mbt> [--prune <path> ...]
 ```
 
 Use repeated `--prune <path>` / `-p <path>` options for paths relative to the
 input directory:
 
 ```sh
-moon runwasm moonbit-community/embed-files ./fixtures -o test/fixtures_bundle.mbt --prune _build --prune .mooncakes
+moon runwasm moonbit-community/embed ./fixtures -o test/fixtures_bundle.mbt --prune _build --prune .mooncakes
 ```
 
 4. Inspect the generated file before handoff. Check that the public names are
