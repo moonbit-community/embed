@@ -35,6 +35,7 @@ jobs:
         run: moon update
 
       - name: Check skill shape
+        if: ${{ runner.os != 'Windows' }}
         run: moon runwasm moonbit-community/meta-skill check .
 
       - name: Check package
