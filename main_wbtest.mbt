@@ -16,32 +16,30 @@ test "prune paths match normalized relative paths" {
 }
 
 ///|
-test "ensure output parent dir creates nested directories" {
+async test "ensure output parent dir creates nested directories" {
   let root = "_tmp_embed_parent_test"
-  @miniio.rmdir(root, recursive=true) catch {
-    Noent => ()
-    err => raise err
+  if @fs.exists(root) {
+    @fs.rmdir(root, recursive=true)
   }
   ensure_output_parent_dir("\{root}/a/b/files.mbt")
-  assert_true(@miniio.is_dir("\{root}/a/b"))
-  @miniio.rmdir(root, recursive=true)
+  assert_true(@fs.kind("\{root}/a/b") is Directory)
+  @fs.rmdir(root, recursive=true)
 }
 
 ///|
-test "ensure output parent dir rejects file parent" {
+async test "ensure output parent dir rejects file parent" {
   let root = "_tmp_embed_parent_file"
-  @miniio.remove(root) catch {
-    Noent => ()
-    err => raise err
+  if @fs.exists(root) {
+    @fs.remove(root)
   }
-  @miniio.write_text_file(root, "not a dir", create_mode=CreateOrTruncate)
+  @fs.write_file(root, "not a dir", create_mode=CreateOrTruncate)
   let mut failed = false
   ensure_output_parent_dir("\{root}/files.mbt") catch {
-    @miniio.Errno::Notdir => failed = true
+    @os_error.OSError(_) as err if err.is_ENOTDIR() => failed = true
     err => raise err
   }
   assert_true(failed)
-  @miniio.remove_file(root)
+  @fs.remove(root)
 }
 
 ///|

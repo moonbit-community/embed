@@ -1,6 +1,6 @@
 name = "moonbit-community/embed"
 
-version = "0.1.1"
+version = "0.1.2"
 
 readme = "README.md"
 
@@ -14,9 +14,9 @@ description = "Embed files into a generated MoonBit source file."
 
 preferred_target = "wasm"
 
-supported_targets = "wasm"
+supported_targets = "wasm+native"
 
 import {
-  "moonbit-community/miniio@0.2.0",
-  "moonbitlang/x@0.4.46",
+  "moonbitlang/x@0.4.49",
+  "moonbitlang/async@0.20.4",
 }

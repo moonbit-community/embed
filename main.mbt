@@ -1,10 +1,23 @@
 ///|
-fn[A] die(message : String) -> A {
-  @miniio.stderr.write_text("error: \{message}\n") catch {
+#cfg(target="wasm")
+fn raw_exit(code : Int) -> Unit = "wasi_snapshot_preview1" "proc_exit"
+
+///|
+#cfg(target="native")
+extern "c" fn raw_exit(code : Int) = "exit"
+
+///|
+fn[A] exit_process(code : Int) -> A {
+  raw_exit(code)
+  panic()
+}
+
+///|
+async fn[A] die(message : String) -> A {
+  @stdio.stderr.write("error: \{message}\n") catch {
     _ => ()
   }
-  @miniio.exit(1)
-  panic()
+  exit_process(1)
 }
 
 ///|
@@ -226,37 +239,22 @@ fn should_prune_path(
 }
 
 ///|
-fn path_exists(path : String) -> Bool raise {
-  @miniio.exists(path) catch {
-    Noent | Notdir => false
-    err => raise err
-  }
-}
-
-///|
-fn ensure_dir(path : String) -> Unit raise {
+async fn ensure_dir(path : String) -> Unit {
   let normalized = normalize_path(path)
   if normalized == "" || normalized == "." {
     return
   }
-  if path_exists(normalized) {
-    guard @miniio.is_dir(normalized) else { raise @miniio.Errno::Notdir }
-    return
-  }
-  let parent = dirname(normalized)
-  if parent != normalized {
-    ensure_dir(parent)
-  }
-  @miniio.mkdir(normalized) catch {
-    Exist => {
-      guard @miniio.is_dir(normalized) else { raise @miniio.Errno::Notdir }
+  @fs.mkdir(normalized, recursive=true) catch {
+    @os_error.OSError(_) as err if err.is_EEXIST() => {
+      let dir = @fs.opendir(normalized)
+      dir.close()
     }
     err => raise err
   }
 }
 
 ///|
-fn ensure_output_parent_dir(output_path : String) -> Unit raise {
+async fn ensure_output_parent_dir(output_path : String) -> Unit {
   ensure_dir(dirname(output_path))
 }
 
@@ -271,8 +269,8 @@ fn bytes_has_nul(bytes : Bytes) -> Bool {
 }
 
 ///|
-fn read_embedded_content(path : String) -> EmbeddedContent raise {
-  let data = @miniio.read_file(path)
+async fn read_embedded_content(path : String) -> EmbeddedContent {
+  let data = @fs.read_file(path)
   let bytes = data.binary()
   if bytes_has_nul(bytes) {
     Binary(bytes)
@@ -284,15 +282,15 @@ fn read_embedded_content(path : String) -> EmbeddedContent raise {
 }
 
 ///|
-fn collect_dir(
+async fn collect_dir(
   dir : String,
   output_path : String,
   prune_paths : Array[String],
   relative_dir : String,
-) -> BundleDir raise {
+) -> BundleDir {
   let normalized_output = normalize_path(output_path)
   let entries : Array[BundleEntry] = []
-  for name in @miniio.readdir(dir, include_hidden=true, sort=true) {
+  for name in @fs.readdir(dir, include_hidden=true, sort=true) {
     let child = path_join(dir, name)
     let relative_child = if relative_dir == "" {
       name
@@ -301,7 +299,7 @@ fn collect_dir(
     }
     if normalize_path(child) != normalized_output &&
       !should_prune_path(relative_child, prune_paths) {
-      if @miniio.is_dir(child) {
+      if @fs.kind(child) is Directory {
         entries.push(
           EntryDir(
             name,
@@ -318,12 +316,12 @@ fn collect_dir(
 }
 
 ///|
-fn read_input_bundle(
+async fn read_input_bundle(
   input : String,
   output_path : String,
   prune_paths : Array[String],
-) -> InputBundle raise {
-  if @miniio.is_dir(input) {
+) -> InputBundle {
+  if @fs.kind(input) is Directory {
     Directory(collect_dir(normalize_path(input), output_path, prune_paths, ""))
   } else {
     SingleFile(read_embedded_content(input))
@@ -573,7 +571,7 @@ fn count_bundle_files(bundle : InputBundle) -> Int {
 }
 
 ///|
-fn run(
+async fn run(
   input : String,
   output_path : String,
   prune_paths : Array[String],
@@ -586,14 +584,10 @@ fn run(
   ensure_output_parent_dir(output_path) catch {
     err => die("failed to create output directory for \{output_path}: \{err}")
   }
-  @miniio.write_text_file(
-    output_path,
-    content,
-    create_mode=@miniio.CreateMode::CreateOrTruncate,
-  ) catch {
+  @fs.write_file(output_path, content, create_mode=CreateOrTruncate) catch {
     err => die("failed to write output \{output_path}: \{err}")
   }
-  @miniio.stdout.write_text(
+  @stdio.stdout.write(
     "wrote \{output_path} with \{count_label(count_bundle_files(bundle))}\n",
   ) catch {
     err => die("failed to write stdout: \{err}")
@@ -601,19 +595,19 @@ fn run(
 }
 
 ///|
-fn main {
+async fn main {
   try {
     let cli = @argparse.Command(
       "embed",
       about="Embed a file or all files under a directory into a MoonBit source file.",
       options=[
-        @argparse.OptionArg(
+        OptionArg(
           "output",
           short='o',
           about="Output MoonBit source path.",
           required=true,
         ),
-        @argparse.OptionArg(
+        OptionArg(
           "prune",
           short='p',
           about="Relative file or directory path to skip. May be repeated.",
@@ -621,7 +615,7 @@ fn main {
         ),
       ],
       positionals=[
-        @argparse.PositionArg(
+        PositionArg(
           "path",
           about="File or directory to embed.",
           num_args=@argparse.ValueRange::single(),
@@ -638,8 +632,10 @@ fn main {
     run(input, output_path, prune_paths)
   } catch {
     err => {
-      println(err.to_string())
-      @miniio.exit(2)
+      @stdio.stdout.write("\{err}\n") catch {
+        _ => ()
+      }
+      exit_process(2)
     }
   }
 }
