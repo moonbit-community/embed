@@ -17,6 +17,6 @@ preferred_target = "wasm"
 supported_targets = "wasm+native"
 
 import {
-  "moonbitlang/x@0.4.49",
+  "moonbitlang/x@0.4.50",
   "moonbitlang/async@0.20.4",
 }
