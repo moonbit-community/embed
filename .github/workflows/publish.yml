@@ -71,8 +71,10 @@ jobs:
       - name: Update dependencies
         run: moon update
 
-      - name: Check skill shape
-        run: moon runwasm moonbit-community/meta-skill check .
+      # Disabled, as in check.yml: the current meta-skill checker rejects
+      # modules that use moonbitlang/async.
+      # - name: Check skill shape
+      #   run: moon runwasm moonbit-community/meta-skill check .
 
       - name: Check package
         run: moon check --target wasm --deny-warn
