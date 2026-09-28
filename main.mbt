@@ -312,7 +312,7 @@ async fn collect_dir(
       }
     }
   }
-  { path: dir, entries }
+  { path: dir, entries, }
 }
 
 ///|
