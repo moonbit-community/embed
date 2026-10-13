@@ -1,13 +1,13 @@
 ///|
 #cfg(target="wasm")
-fn raw_exit(code : Int) -> Unit = "wasi_snapshot_preview1" "proc_exit"
+fn raw_exit(code : Int32) -> Unit = "wasi_snapshot_preview1" "proc_exit"
 
 ///|
 #cfg(target="native")
-extern "c" fn raw_exit(code : Int) = "exit"
+extern "c" fn raw_exit(code : Int32) = "exit"
 
 ///|
-fn[A] exit_process(code : Int) -> A {
+fn[A] exit_process(code : Int32) -> A {
   raw_exit(code)
   panic()
 }
@@ -542,7 +542,7 @@ fn render_bundle(input : String, bundle : InputBundle) -> String {
 }
 
 ///|
-fn count_label(count : Int) -> String {
+fn count_label(count : Int32) -> String {
   if count == 1 {
     "1 file"
   } else {
@@ -551,7 +551,7 @@ fn count_label(count : Int) -> String {
 }
 
 ///|
-fn count_dir_files(dir : BundleDir) -> Int {
+fn count_dir_files(dir : BundleDir) -> Int32 {
   let mut count = 0
   for entry in dir.entries {
     match entry {
@@ -563,7 +563,7 @@ fn count_dir_files(dir : BundleDir) -> Int {
 }
 
 ///|
-fn count_bundle_files(bundle : InputBundle) -> Int {
+fn count_bundle_files(bundle : InputBundle) -> Int32 {
   match bundle {
     SingleFile(_) => 1
     Directory(dir) => count_dir_files(dir)
