@@ -71,19 +71,27 @@ jobs:
       - name: Update dependencies
         run: moon update
 
-      # Disabled, as in check.yml: the current meta-skill checker rejects
-      # modules that use moonbitlang/async.
-      # - name: Check skill shape
-      #   run: moon runwasm moonbit-community/meta-skill check .
-
       - name: Check package
-        run: moon check --target wasm --deny-warn
+        run: |
+          moon check --target wasm --warn-list +73+79 --deny-warn
+          moon check --target native --warn-list +73+79 --deny-warn
 
       - name: Test package
-        run: moon test --target wasm --serial
+        run: |
+          moon test --target wasm -j 1
+          moon test --target native -j 1
+          moon test --release --target wasm -j 1
+          moon test --release --target native -j 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Test generated bundles
+        run: python tests/test_cli.py
 
       - name: Build WASM package
-        run: moon build --target wasm
+        run: moon build --target wasm --release
 
       - name: Check generated interfaces
         run: |

@@ -1,6 +1,6 @@
 ---
 name: embed
-description: "Embed files into a generated MoonBit source file."
+description: "Embed small fixture files, templates, or static assets into generated MoonBit source. Use when a MoonBit package needs checked-in String or Bytes data from files or directories."
 ---
 
 # embed
@@ -18,18 +18,21 @@ templates, or other static assets checked in as generated MoonBit source.
 3. Run the tool:
 
 ```sh
-moon runwasm moonbit-community/embed <path> -o <output.mbt> [--prune <path> ...]
+moonx moonbit-community/embed@latest <path> -o <output.mbt> [--prune <path> ...]
 ```
 
 Use repeated `--prune <path>` / `-p <path>` options for paths relative to the
 input directory:
 
 ```sh
-moon runwasm moonbit-community/embed ./fixtures -o test/fixtures_bundle.mbt --prune _build --prune .mooncakes
+moonx moonbit-community/embed@latest ./fixtures -o test/fixtures_bundle.mbt --prune _build --prune .mooncakes
 ```
 
 4. Inspect the generated file before handoff. Check that the public names are
    usable for the surrounding code and that no unintended files were embedded.
+   Hidden files are included; prune them explicitly if they are not intended
+   inputs. Keep bundles with overlapping file names in separate packages, since
+   generated private bindings share the package namespace.
 5. Run the package or module checks that cover the output file, normally
    `moon check` and the relevant `moon test`.
 
@@ -43,5 +46,5 @@ moon runwasm moonbit-community/embed ./fixtures -o test/fixtures_bundle.mbt --pr
 - Binary files are supported, but inspect the generated size before committing.
 - Directory inputs are recursive and keep their nested structure in the
   generated MoonBit API.
-- If generated names collide or are awkward, rename the source files or choose a
+- If generated public names are awkward, rename the source files or choose a
   narrower input directory, then regenerate.
