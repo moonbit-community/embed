@@ -1,6 +1,6 @@
 name = "moonbit-community/embed"
 
-version = "0.1.6"
+version = "0.1.7"
 
 readme = "README.md"
 
@@ -17,6 +17,6 @@ preferred_target = "wasm"
 supported_targets = "wasm+native"
 
 import {
-  "moonbitlang/x@0.5.7",
-  "moonbitlang/async@0.22.9",
+  "moonbitlang/x@0.5.9",
+  "moonbitlang/async@0.22.10",
 }

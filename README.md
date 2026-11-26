@@ -78,7 +78,7 @@ independent bundle in its own package if its file names overlap another bundle;
 private top-level bindings also share the package namespace.
 
 Text must be valid UTF-8 without NUL bytes; other files are embedded as `Bytes`.
-Use `moonx moonbit-community/embed@0.1.6` to pin this release instead of resolving
+Use `moonx moonbit-community/embed@0.1.7` to pin this release instead of resolving
 `@latest` on each invocation. Run `moonx moonbit-community/embed@latest --help`
 for the full CLI usage.
 
